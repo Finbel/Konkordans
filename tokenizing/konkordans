@@ -3,7 +3,7 @@
 export LC_COLLATE=C 
 echo "startar tokenizer och sortering"
 STARTTIME=$(date +%s)
-tokenizer < testfil | sort > ut
+./tokenizer < testfil | sort > ut
 ENDTIME=$(date +%s)
 echo "tokenizer och sorteringen är klar"
 echo "det tog $(($ENDTIME - $STARTTIME)) sekunder"

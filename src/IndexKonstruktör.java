@@ -48,7 +48,7 @@ public class IndexKonstruktör {
 	private static void konstruera() {
 		
 		// Creating and initializing path-variables
-		String rawIndexPath = "/var/tmp/ut";	// our rawIndex
+		String rawIndexPath = System.getProperty("user.dir") + "/tokenizing/ut";	// our rawIndex /tokenizing/ut
 		String wordIndexPath = "wordIndex";		//
 		String offsetIndexPath = "offsetIndex"; //
 		String hashKeyPath = "hashKey";			//
@@ -90,9 +90,9 @@ public class IndexKonstruktör {
 		int hashPosition = 0;
 		
 		// The current 3-letter substring, changes when we come to a new one.
-		String currentSubstring = "";
+		String oldSubstring = "";
 		// We will need a control number for the special cases when the word length is less than 3
-		String controllString = "";
+		String newSubstring = "";
 		
 		// A list that will hold the positions the current word has been 
 		// encountered on throughout the corpus
@@ -128,7 +128,7 @@ public class IndexKonstruktör {
 				newWord = rawIndex.getWord();
 				
 				// Check if we have reached a new word
-				if(!(oldWord.equals(newWord))){// && !(oldWord.equals(""))){ //optimize
+				if(!(oldWord.equals(newWord)) && !(oldWord.equals(""))){ //optimize
 					
 					// append the last word and it's offset position to the list of words
 					wordBuilder.append(oldWord + " " + offsetPosition + " ");
@@ -150,19 +150,19 @@ public class IndexKonstruktör {
 				
 				// Control for StringIndexOutOfBoundsException:
 				switch(newWord.length()){
-					case 1 : controllString = newWord.substring(0, 1);
+					case 1 : newSubstring = newWord.substring(0, 1);
 						break;
-					case 2 : controllString = newWord.substring(0, 2);
+					case 2 : newSubstring = newWord.substring(0, 2);
 						break;
-					default : controllString = newWord.substring(0, 3);
+					default : newSubstring = newWord.substring(0, 3);
 				}
 					
 				// Check if the new word also has a new first-3-letter substring
-				if(!(currentSubstring.equals(controllString)) && !(oldWord.equals(""))){
+				if(!(oldSubstring.equals(newSubstring)) && !(oldWord.equals(""))){ //optimize
 					
 					// Add to the hash
-					hashBuilder.append(controllString + " " + hashPosition + " ");
-					currentSubstring = controllString;
+					hashBuilder.append(newSubstring + " " + hashPosition + " ");
+					oldSubstring = newSubstring;
 					
 					// Write to the hashKey file
 					hashKey.write(hashBuilder.toString());
