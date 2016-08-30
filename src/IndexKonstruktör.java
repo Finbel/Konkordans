@@ -4,57 +4,35 @@ import java.util.ArrayList;
 
 public class IndexKonstruktör {
 
+	// Creating and initializing path-variables
+	static String wordIndexPath2 = "wordIndex";		//
+	static String offsetIndexPath2 = "offsetIndex"; //
+	static String hashKeyPath2 = "hashKey";
+	static String korpusPath2 = "";
+	
 	/**
 	 * @param args
+	 * @throws IOException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		konstruera();
-		testOffsetFile();
+		Seeker harry = new Seeker(hashKeyPath2, wordIndexPath2, offsetIndexPath2, korpusPath2);
+		harry.fuckingSeekAlready();
+		System.out.println("FUCK");
 	}
 
-	private static void testOffsetFile() {
-		// TODO Auto-generated method stub
-		try{
-			System.out.println("|||||||||||||||||||||");
-			FileInputStream fis = new FileInputStream("offsetIndex");
-			BufferedInputStream bos = new BufferedInputStream(fis);
-			DataInputStream dis = new DataInputStream(bos);
-			
-			Kattio dis2 = new Kattio(bos);
-			
-			int i = 0;
-			while(dis2.hasMoreTokens()){
-				System.out.print(dis2.getInt() + " ");
-				if (i%20==0) System.out.println();
-				i++;
-			}
-			i = 0;
-			System.out.println("|||||||||||||||||||||");
-			
-			while(dis.available()>0){
-				System.out.print(dis.readInt()+ " ");
-				if (i%20==0) System.out.println();
-				i++;
-			}
-			
-			dis.close();
-			dis2.close();
-			
-		} catch(Exception e){
-			e.printStackTrace();
-		}
-	}
 
 	private static void konstruera() {
+		
 		
 		// Creating and initializing path-variables
 		String rawIndexPath = System.getProperty("user.dir") + "/tokenizing/ut";	// our rawIndex /tokenizing/ut
 		String wordIndexPath = "wordIndex";		//
 		String offsetIndexPath = "offsetIndex"; //
-		String hashKeyPath = "hashKey";			//
+		String hashKeyPath = "hashKey";
+		
 		
 		// Creating necessary streams and writers  
-		
 		// Input from rawIndex
 		FileInputStream fis;				// Will read from rawIndex 
 		BufferedInputStream bis;			// Will wrap fis
@@ -161,7 +139,7 @@ public class IndexKonstruktör {
 				if(!(oldSubstring.equals(newSubstring)) && !(oldWord.equals(""))){ //optimize
 					
 					// Add to the hash
-					hashBuilder.append(newSubstring + " " + hashPosition + " ");
+					hashBuilder.append(oldSubstring + " " + hashPosition + " ");
 					oldSubstring = newSubstring;
 					
 					// Write to the hashKey file
@@ -186,6 +164,7 @@ public class IndexKonstruktör {
 				textPositions.add(rawIndex.getInt());
 				// We are now done with the current word
 				oldWord = newWord;
+				oldSubstring = newSubstring;
 			}
 			
 			// The loop is done when the rawIndex is empty
@@ -194,6 +173,13 @@ public class IndexKonstruktör {
 			
 			// append it's offset position to the list of words
 			wordBuilder.append(oldWord + " " + offsetPosition);
+			// Write all words on last substring to file
+			wordIndex.write(wordBuilder.toString());
+			
+			// append to hashKey file
+			hashBuilder.append(oldSubstring + " " + hashPosition + " ");
+			// Write to the hashKey file
+			hashKey.write(hashBuilder.toString());
 			
 			// write the number of positions we have of it to the offsetIndex
 			offsetIndex.writeInt(textPositions.size());
@@ -204,11 +190,11 @@ public class IndexKonstruktör {
 			}
 			
 			// Done and dusted.
-			rawIndex.close();
+			//rawIndex.close();
 			wordIndex.close();
 			offsetIndex.close();
 			hashKey.close();
-						
+
 		} catch( Exception e ){
 			e.printStackTrace();
 		}		
