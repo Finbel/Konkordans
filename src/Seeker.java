@@ -1,10 +1,12 @@
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 
 public class Seeker {
 
@@ -50,38 +52,110 @@ public class Seeker {
 		}
 	}
 	
-	public void wordTest() throws IOException{ //
-		/* test to seek on the spot "des" points at to search for "destruction"
-		 * meaning we skip the word desire
-		*/
-		wordFile.seek(19);
-		String hash = "des";
-		String lookingFor = "destruction";
-		String word = "";
-		String number = "";
-		while(!(word.equals(lookingFor))){ 
-			System.out.println("1) Word is :" + word + ":" + lookingFor + ":");
-			word = getWord(wordFile);
-			System.out.println("2) Word is :" + word + ":" + lookingFor + ":");
-			String wordSub = word.substring(0, 3);
-			if(!(hash.equals(wordSub))){
-				System.out.println("error");
-				System.out.println("Word is " + word);
-				System.out.println("hash is \"" + hash + "\"");
-				System.out.println("wordSub is \"" + wordSub + "\"");
-			}
-			// eat up number:
-			number = getWord(wordFile);
-		}
-		System.out.println("Word is now " + word);
-		System.out.println("Position is " + number);
+	public void konkord(String word) throws IOException{
+
+		int offsetIndex = 0;
+		int[] wordList;
+
+		int wordIndex = SBHI(word);
+
+		if(wordIndex != -1)
+			 offsetIndex = SBWI(word, wordIndex);
 		
+		if(offsetIndex!=-1)
+			 wordList = SBOS(offsetIndex);		
 		
+		//if(wordList.length>0)	
+			//PBK(wordList);
 	}
 	
-	private int getPos(RandomAccessFile file) throws IOException {
-		return (int) file.getFilePointer();
+	private int[] SBOS(int offset) throws IOException{
+		offsetFile.seek(offset);
+		int size = offsetFile.readInt();
+		int[] retlist = new int[size];
+		for(int i = 0; i<size; i++) {
+			retlist[i] = offsetFile.readInt();
+		}
+		return retlist;
 	}
+	
+	private void PBK(int [] offsets) throws IOException {
+ 	StringBuilder sb;
+ 	for(int i : offsets) {
+ 		sb = new StringBuilder();
+ 		if(!(i<30))
+ 			i -=30;
+ 		korpusFile.seek(i);
+ 		for(int j = 0; j<30; j++) {
+ 			try {
+ 				sb.append((char)korpusFile.read());
+ 			}
+ 			catch(EOFException e) {break;}
+ 		}
+ 		System.out.println(sb.toString());
+ 	}
+ }
+	
+	private int SBHI(String word) throws IOException {
+		String subWord = "";
+		String readWord;
+		int retInt;
+		for (int i = 0; i<word.length(); i++) {
+			subWord += word.charAt(i);
+			if(i == 2)
+				break;
+		}
+		while (true) {
+			try {
+				readWord = getWord(hashFile);
+			} catch(EOFException ex) {
+				retInt = -1;
+				return retInt;
+			}
+			if(readWord.equals(subWord)) {
+				retInt = Integer.parseInt(getWord(hashFile));
+				return retInt;
+			}
+			readWord =getWord(hashFile);
+		}
+	}
+	
+	private String getSubString(String word){
+		// Control for StringIndexOutOfBoundsException:
+		switch(word.length()){
+			case 1 : return word.substring(0, 1);
+			case 2 : return word.substring(0, 2);
+			default : return word.substring(0, 3);
+		}
+	}
+	
+	public int SBWI(String lookingFor, int position) throws IOException{ //
+		
+		wordFile.seek(position);
+		String hash = getSubString(lookingFor);
+		
+		String word = "";
+		String number = "";
+		String wordSub;
+		
+		while(!(word.equals(lookingFor))){ 
+	
+			word = getWord(wordFile);
+			wordSub = getSubString(word);
+	
+			if(!(hash.equals(wordSub))){
+				System.out.println("error, word does not exsist");
+				return -1;
+			}
+			
+			// eat up number:
+			number = getWord(wordFile);
+
+		}
+		
+		return Integer.parseInt(number);
+	}
+
 	
 	private String getWord(RandomAccessFile file) throws IOException {
 		StringBuilder stb = new StringBuilder();
