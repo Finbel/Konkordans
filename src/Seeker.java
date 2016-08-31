@@ -30,19 +30,51 @@ public class Seeker {
 	*/
 	
 	private RandomAccessFile offsetFile;
+	private RandomAccessFile hashFile;
+	private RandomAccessFile wordFile;
+	private RandomAccessFile korpusFile;
 	
 	public Seeker(String hashKey, String wordIndex, String offsetIndex, String korpus) throws IOException {
 		
 		offsetFile = new RandomAccessFile(offsetIndex, "r");
+		hashFile = new RandomAccessFile(hashKey, "r");
+		wordFile = new RandomAccessFile(wordIndex, "r");
+		//korpusFile = new RandomAccessFile(korpus, "r");
 		
 	}
 	
-	public void fuckingSeekAlready() throws IOException{
+	public void offsetTest() throws IOException{
 		for(int i = 0; i < 10; i++){
 			int wahabi = offsetFile.readInt();
 			System.out.println(wahabi);			
 		}
 	}
+	
+	public void wordTest() throws IOException{
+		char wahabi = (char)wordFile.read();
+		System.out.print(wahabi);
+		while(wahabi != ' '){
+			wahabi = (char)wordFile.read();
+			System.out.print(wahabi +"i");	
+		}
+		System.out.println();
+		String wahabi2 = wordFile.readUTF();
+		System.out.println(wahabi2+"i");			
+	}
+	
+	public void hashTest() throws IOException{
+		for(int i = 0; i < 10; i++){
+			int wahabi = hashFile.readInt();
+			System.out.println(wahabi);			
+		}
+	}
+	
+	/*public void korpusTest() throws IOException{
+		for(int i = 0; i < 10; i++){
+			int wahabi = korpusFile.readInt();
+			System.out.println(wahabi);			
+		}
+	}*/
 
 	
 }

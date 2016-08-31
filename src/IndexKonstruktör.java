@@ -17,7 +17,8 @@ public class IndexKonstruktör {
 	public static void main(String[] args) throws IOException {
 		konstruera();
 		Seeker harry = new Seeker(hashKeyPath2, wordIndexPath2, offsetIndexPath2, korpusPath2);
-		harry.fuckingSeekAlready();
+		harry.offsetTest();
+		harry.wordTest();
 		System.out.println("FUCK");
 	}
 
