@@ -7,8 +7,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Scanner;
 
-public class Seeker {
+public class Konkordans {
 
 	/*// declare streams from offsetIndex
 	private FileInputStream o_fis;
@@ -31,31 +32,24 @@ public class Seeker {
 	private Kattio korpusReader;				// will wrap k_bis
 	*/
 	
-	private RandomAccessFile offsetFile;
-	private RandomAccessFile hashFile;
-	private RandomAccessFile wordFile;
-	private RandomAccessFile korpusFile;
+	private static RandomAccessFile offsetFile;
+	private static RandomAccessFile hashFile;
+	private static RandomAccessFile wordFile;
+	private static RandomAccessFile korpusFile;
 	
-	public Seeker(String hashKey, String wordIndex, String offsetIndex, String korpus) throws IOException {
+	public static void main(String[] args) throws IOException {
 		
-		offsetFile = new RandomAccessFile(offsetIndex, "r");
-		hashFile = new RandomAccessFile(hashKey, "r");
-		wordFile = new RandomAccessFile(wordIndex, "r");
-		//korpusFile = new RandomAccessFile(korpus, "r");
+		String word = args[0];
 		
-	}
-	
-	public void offsetTest() throws IOException{
-		for(int i = 0; i < 10; i++){
-			int wahabi = offsetFile.readInt();
-			System.out.println(wahabi);			
-		}
-	}
-	
-	public void konkord(String word) throws IOException{
+		String korpusPath = System.getProperty("user.dir") + "/tokenizing/testfil";
+			
+		offsetFile = new RandomAccessFile("offsetIndex", "r");
+		hashFile = new RandomAccessFile("hashKey", "r");
+		wordFile = new RandomAccessFile("wordIndex", "r");
+		korpusFile = new RandomAccessFile(korpusPath, "r");
 
-		int offsetIndex = 0;
-		int[] wordList;
+		int offsetIndex = -1;
+		int[] wordList = {};
 
 		int wordIndex = SBHI(word);
 
@@ -65,12 +59,22 @@ public class Seeker {
 		if(offsetIndex!=-1)
 			 wordList = SBOS(offsetIndex);		
 		
-		//if(wordList.length>0)	
-			//PBK(wordList);
+		System.out.println("Det finns " + wordList.length + " förekommelser av ordet");
+		if(wordList.length>25){
+			Scanner sc = new Scanner(System.in);
+			System.out.print("Vill du ha förekomsterna utskrivna? (y/n):\t");
+			String alternativ = sc.nextLine();
+			if(alternativ.equals("n")){
+				System.exit(1);	
+			}
+		}
+		
+		if(wordList.length>0)	
+			PBK(wordList, word);
 	}
 	
-	private int[] SBOS(int offset) throws IOException{
-		offsetFile.seek(offset);
+	public static int[] SBOS(int offset) throws IOException{
+		offsetFile.seek(offset*4);
 		int size = offsetFile.readInt();
 		int[] retlist = new int[size];
 		for(int i = 0; i<size; i++) {
@@ -79,39 +83,42 @@ public class Seeker {
 		return retlist;
 	}
 	
-	private void PBK(int [] offsets) throws IOException {
+	public static void PBK(int [] offsets, String word) throws IOException {
  	StringBuilder sb;
  	for(int i : offsets) {
  		sb = new StringBuilder();
+ 		char c;
+ 		int end;
  		if(!(i<30))
  			i -=30;
  		korpusFile.seek(i);
- 		for(int j = 0; j<30; j++) {
- 			try {
- 				sb.append((char)korpusFile.read());
- 			}
- 			catch(EOFException e) {break;}
+ 		for(int j = 0; j<60+word.length(); j++) {
+ 				end = korpusFile.read();
+ 				if (end == -1)
+ 					break;
+ 				c = (char) end;
+ 				sb.append( c=='\n' ? ' ' : c );
  		}
  		System.out.println(sb.toString());
  	}
  }
 	
-	private int SBHI(String word) throws IOException {
+	public static int SBHI(String word) throws IOException {
+		hashFile.seek(0);
 		String subWord = "";
-		String readWord;
-		int retInt;
+		String readWord = "";
+		int retInt = 0;
 		for (int i = 0; i<word.length(); i++) {
 			subWord += word.charAt(i);
 			if(i == 2)
 				break;
 		}
 		while (true) {
-			try {
+		
 				readWord = getWord(hashFile);
-			} catch(EOFException ex) {
-				retInt = -1;
-				return retInt;
-			}
+				if(	readWord.equals("-1"))
+					return Integer.parseInt(readWord);
+			
 			if(readWord.equals(subWord)) {
 				retInt = Integer.parseInt(getWord(hashFile));
 				return retInt;
@@ -120,7 +127,7 @@ public class Seeker {
 		}
 	}
 	
-	private String getSubString(String word){
+	private static String getSubString(String word){
 		// Control for StringIndexOutOfBoundsException:
 		switch(word.length()){
 			case 1 : return word.substring(0, 1);
@@ -129,7 +136,7 @@ public class Seeker {
 		}
 	}
 	
-	public int SBWI(String lookingFor, int position) throws IOException{ //
+	public static int SBWI(String lookingFor, int position) throws IOException{ //
 		
 		wordFile.seek(position);
 		String hash = getSubString(lookingFor);
@@ -157,34 +164,27 @@ public class Seeker {
 	}
 
 	
-	private String getWord(RandomAccessFile file) throws IOException {
+	private static String getWord(RandomAccessFile file) throws IOException {
 		StringBuilder stb = new StringBuilder();
 		String word;
 		char c;
 		c = (char)file.read();
+		int end;
 		do {
 			stb.append(c);
-			c = (char)file.read();
+			//System.out.print(c);
+			end = file.read();
+			if(end==-1)
+				return "-1";
+			c = (char)end;
+			
 		} while (c != ' ');
+		//System.out.println();
 		
 		word = stb.toString();
 		word.trim();
 		return word;
 	}
-
-	public void hashTest() throws IOException{
-		for(int i = 0; i < 10; i++){
-			int wahabi = hashFile.readInt();
-			System.out.println(wahabi);			
-		}
-	}
-	
-	/*public void korpusTest() throws IOException{
-		for(int i = 0; i < 10; i++){
-			int wahabi = korpusFile.readInt();
-			System.out.println(wahabi);			
-		}
-	}*/
 
 	
 }

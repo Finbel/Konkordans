@@ -4,21 +4,13 @@ import java.util.ArrayList;
 
 public class IndexKonstruktör {
 
-	// Creating and initializing path-variables
-	static String wordIndexPath2 = "wordIndex";		//
-	static String offsetIndexPath2 = "offsetIndex"; //
-	static String hashKeyPath2 = "hashKey";
-	static String korpusPath2 = "";
-	
 	/**
 	 * @param args
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
 		konstruera();
-		Seeker harry = new Seeker(hashKeyPath2, wordIndexPath2, offsetIndexPath2, korpusPath2);
 	}
-
 
 	private static void konstruera() {
 		
@@ -170,7 +162,7 @@ public class IndexKonstruktör {
 			// Take care of the last word and then close the streams
 			
 			// append it's offset position to the list of words
-			wordBuilder.append(oldWord + " " + offsetPosition);
+			wordBuilder.append(oldWord + " " + offsetPosition + " ");
 			// Write all words on last substring to file
 			wordIndex.write(wordBuilder.toString());
 			
