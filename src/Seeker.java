@@ -50,18 +50,54 @@ public class Seeker {
 		}
 	}
 	
-	public void wordTest() throws IOException{
-		char wahabi = (char)wordFile.read();
-		System.out.print(wahabi);
-		while(wahabi != ' '){
-			wahabi = (char)wordFile.read();
-			System.out.print(wahabi +"i");	
+	public void wordTest() throws IOException{ //
+		/* test to seek on the spot "des" points at to search for "destruction"
+		 * meaning we skip the word desire
+		*/
+		wordFile.seek(19);
+		String hash = "des";
+		String lookingFor = "destruction";
+		String word = "";
+		String number = "";
+		while(!(word.equals(lookingFor))){ 
+			System.out.println("1) Word is :" + word + ":" + lookingFor + ":");
+			word = getWord(wordFile);
+			System.out.println("2) Word is :" + word + ":" + lookingFor + ":");
+			String wordSub = word.substring(0, 3);
+			if(!(hash.equals(wordSub))){
+				System.out.println("error");
+				System.out.println("Word is " + word);
+				System.out.println("hash is \"" + hash + "\"");
+				System.out.println("wordSub is \"" + wordSub + "\"");
+			}
+			// eat up number:
+			number = getWord(wordFile);
 		}
-		System.out.println();
-		String wahabi2 = wordFile.readUTF();
-		System.out.println(wahabi2+"i");			
+		System.out.println("Word is now " + word);
+		System.out.println("Position is " + number);
+		
+		
 	}
 	
+	private int getPos(RandomAccessFile file) throws IOException {
+		return (int) file.getFilePointer();
+	}
+	
+	private String getWord(RandomAccessFile file) throws IOException {
+		StringBuilder stb = new StringBuilder();
+		String word;
+		char c;
+		c = (char)file.read();
+		do {
+			stb.append(c);
+			c = (char)file.read();
+		} while (c != ' ');
+		
+		word = stb.toString();
+		word.trim();
+		return word;
+	}
+
 	public void hashTest() throws IOException{
 		for(int i = 0; i < 10; i++){
 			int wahabi = hashFile.readInt();
