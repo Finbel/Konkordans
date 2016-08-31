@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 
 public class IndexKonstruktör {
@@ -25,8 +26,10 @@ public class IndexKonstruktör {
 		// Creating necessary streams and writers  
 		// Input from rawIndex
 		FileInputStream fis;				// Will read from rawIndex 
-		BufferedInputStream bis;			// Will wrap fis
-		Kattio rawIndex;					// will wrap bis
+		//BufferedInputStream bis;			// Will wrap fis
+		//Kattio rawIndex;					// will wrap bis
+		InputStreamReader isr;				//TODO: replace kattio
+		BufferedReader rawIndex; 			//TODO: replace kattio
 		
 		// Output to wordIndex
 		FileWriter fwOne;					// Will write to wordIndex
@@ -75,8 +78,8 @@ public class IndexKonstruktör {
 			
 			// Initialize the streams and writers 
 			fis = new FileInputStream(rawIndexPath);
-			bis = new BufferedInputStream(fis);
-			rawIndex = new Kattio(bis);
+			isr = new InputStreamReader(fis, "ISO-8859-1");
+			rawIndex = new BufferedReader(isr);
 			
 			fwOne = new FileWriter(wordIndexPath);
 			wordIndex = new BufferedWriter(fwOne);
@@ -88,12 +91,16 @@ public class IndexKonstruktör {
 			fwTwo = new FileWriter(hashKeyPath);
 			hashKey = new BufferedWriter(fwTwo);
 			
+			String line = rawIndex.readLine();
+			StringTokenizer st; 
 			// Start loop-through of rawIndex
-			while(rawIndex.hasMoreTokens()){
-				
+			while(line!=null){
+				st= new StringTokenizer(line);
+				//Start loop-through line
+				while(st.hasMoreTokens()){
 				// Load next word into newWord 
 				// assuming the text will alternate between word and respective place
-				newWord = rawIndex.getWord();
+				newWord = st.nextToken();
 				
 				// Check if we have reached a new word
 				if(!(oldWord.equals(newWord)) && !(oldWord.equals(""))){ //optimize
@@ -151,10 +158,12 @@ public class IndexKonstruktör {
 				// Do this for all words:
 				
 				// Add the associated position to our list of text positions
-				textPositions.add(rawIndex.getInt());
+				textPositions.add(Integer.parseInt(st.nextToken()));
 				// We are now done with the current word
 				oldWord = newWord;
 				oldSubstring = newSubstring;
+			}
+				line = rawIndex.readLine();
 			}
 			
 			// The loop is done when the rawIndex is empty

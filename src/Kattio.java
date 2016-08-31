@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.OutputStream;
 
 class Kattio extends PrintWriter {
@@ -50,19 +51,19 @@ class Kattio extends PrintWriter {
 	return peekToken() != null;
     }
 
-    public int getInt() {
+    public int getInt() throws NumberFormatException, UnsupportedEncodingException {
 	return Integer.parseInt(nextToken());
     }
 
-    public double getDouble() { 
+    public double getDouble() throws NumberFormatException, UnsupportedEncodingException { 
 	return Double.parseDouble(nextToken());
     }
 
-    public long getLong() {
+    public long getLong() throws NumberFormatException, UnsupportedEncodingException {
 	return Long.parseLong(nextToken());
     }
 
-    public String getWord() {
+    public String getWord() throws UnsupportedEncodingException {
 	return nextToken();
     }
 
@@ -72,7 +73,7 @@ class Kattio extends PrintWriter {
     private String line;
     private StringTokenizer st;
     private String token;
-
+    
     private String peekToken() {
 	if (token == null) 
 	    try {
@@ -86,9 +87,26 @@ class Kattio extends PrintWriter {
 	return token;
     }
 
-    private String nextToken() {
+    private String nextToken() throws UnsupportedEncodingException {
 	String ans = peekToken();
 	token = null;
+	System.out.println("Before: " + ans);
+	byte[] b = ans.getBytes();
+	for(byte c : b){
+		System.out.print((char)c);
+	}
+	System.out.println();
+	for(byte c : b){
+		System.out.print(c + " ");
+	}
+	System.out.println();
+	b = ans.getBytes("ISO-8859-1");
+	for(byte c : b){
+		System.out.print((char)c);
+	}
+	System.out.println();
+	ans = new String(b, "UTF-8");
+	System.out.println("After: " + ans);
 	return ans;
     }
 }
